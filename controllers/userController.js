@@ -7,7 +7,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
     async getAllUsers(req,res){
-        const users = await Users.find({}).select('name email phone deletedAt updatedAt');
+        const users = await Users.find({}).select('-password');
        try{
             if(users){
                const userList = await users.filter((user)=>{
@@ -32,7 +32,7 @@ module.exports = {
 
     async getSingleUser(req,res){
         const userId  = new ObjectId(req.params.userId);
-        const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt updatedAt');
+        const user = await Users.findOne({ "_id":userId }).select('-password');
        try{
             if(user && user.deletedAt == null){
                 res.send({
@@ -51,7 +51,8 @@ module.exports = {
     },
 
     async createUser(req,res){
-        const {name,email,phone,password, deletedAt, updatedAt} = req.body;
+        const newuser = req.body;
+        const {email,phone} = req.body;
         const userEmail = await Users.findOne({email});
         const userPhone = await Users.findOne({phone});
         try{
@@ -66,7 +67,7 @@ module.exports = {
                     msg:"User with this phone already exists"
                 })
             }else{
-                const user  = new Users({name,email,phone,password,deletedAt,updatedAt})
+                const user  = new Users(newuser)
                 user.save((error=>{
                     if(error){
                         console.log(error)
