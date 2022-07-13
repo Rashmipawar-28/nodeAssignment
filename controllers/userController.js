@@ -7,7 +7,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
     async getAllUsers(req,res){
-        const users = await Users.find({}).select('name email phone deletedAt');
+        const users = await Users.find({}).select('name email phone deletedAt updatedAt');
        try{
             if(users){
                const userList = await users.filter((user)=>{
@@ -32,7 +32,7 @@ module.exports = {
 
     async getSingleUser(req,res){
         const userId  = new ObjectId(req.params.userId);
-        const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt');
+        const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt updatedAt');
        try{
             if(user && user.deletedAt == null){
                 res.send({
@@ -51,7 +51,7 @@ module.exports = {
     },
 
     async createUser(req,res){
-        const {name,email,phone,password, deletedAt} = req.body;
+        const {name,email,phone,password, deletedAt, updatedAt} = req.body;
         const userEmail = await Users.findOne({email});
         const userPhone = await Users.findOne({phone});
         try{
@@ -66,7 +66,7 @@ module.exports = {
                     msg:"User with this phone already exists"
                 })
             }else{
-                const user  = new Users({name,email,phone,password,deletedAt})
+                const user  = new Users({name,email,phone,password,deletedAt,updatedAt})
                 user.save((error=>{
                     if(error){
                         console.log(error)
@@ -119,7 +119,6 @@ module.exports = {
     },
 
     async updateUser(req,res){
-        // const userId  = new ObjectId(req.params.userId);
         const userId  = req.params.userId;
         const hashedPassword = await utils.hashedPassword(req.body.password)
         // const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt');
@@ -129,8 +128,8 @@ module.exports = {
                 name: req.body.name,
                 email: req.body.email,
                 phone : req.body.phone,
-                password: hashedPassword
-              
+                password: hashedPassword,
+                updatedAt: new Date()
             },
             {
               multi: true

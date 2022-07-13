@@ -26,6 +26,9 @@ const userSchema = new Schema({
     },
     deletedAt:{
         type:Date
+    },
+    updatedAt:{
+        type:Date
     }
 })
 
