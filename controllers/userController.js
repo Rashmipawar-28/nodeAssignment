@@ -1,7 +1,7 @@
 const Users = require('../models/user')
 const mongoose = require("mongoose");
 const user = require('../models/user');
-const utils = require('./utils/utils')
+const utils = require('../utils/utils')
 const ObjectId = mongoose.Types.ObjectId; 
 
 
@@ -26,7 +26,10 @@ module.exports = {
                 })
             }
        }catch(error){
-        console.log(error)
+        res.send({
+            type:false,
+            msg:"error while getting users"
+        })
        }
     },
 
@@ -47,7 +50,10 @@ module.exports = {
                 })
             }
        }catch(error){
-        console.log(error)
+        res.send({
+            type:false,
+            msg:"error while getting user with id : "+ userId
+        })
        }
     },
 
@@ -86,7 +92,10 @@ module.exports = {
             }
 
         }catch(err){
-            console.log(err)
+            res.send({
+                type:false,
+                msg:"error while creating a user"
+            })
         }
     },
 
@@ -116,21 +125,26 @@ module.exports = {
                 })
             }
        }catch(error){
-        console.log(error)
+        res.send({
+            type:false,
+            msg:"error while deleting a user"
+        })
        }
     },
 
     async updateUser(req,res){
-        const userId  = req.params.userId;
-        const hashedPassword = await utils.hashedPassword(req.body.password)
+        // const userId  = req.params.userId;
+        const userId  = new ObjectId(req.params.userId);
+
+        // const hashedPassword = await utils.hashedPassword(req.body.password)
         // const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt');
-        await user.findByIdAndUpdate(userId, 
+        await user.findOneAndUpdate({_id:userId,deletedAt:null}, 
             {
               
                 name: req.body.name,
                 email: req.body.email,
                 phone : req.body.phone,
-                password: hashedPassword,
+                // password: hashedPassword,
                 updatedAt: new Date()
             },
             {

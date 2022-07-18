@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema
 const bcrypt = require('bcrypt');
-const config_env = JSON.parse(process.env.CONFIG);
 
 
 const userSchema = new Schema({
@@ -34,7 +33,7 @@ const userSchema = new Schema({
 
 userSchema.pre('save',function(next){
     const user = this;
-    bcrypt.genSalt(config_env.saltRounds, (error, salt) =>{
+    bcrypt.genSalt(process.env.saltRounds, (error, salt) =>{
         bcrypt.hash(user.password, salt, function(err, hash) {
             // Store hash in your password DB.
             user.password = hash;

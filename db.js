@@ -1,12 +1,10 @@
 const mongoose = require("mongoose");
-const config_env = JSON.parse(process.env.CONFIG);
-
 
 class Connection {
 
     static async open() {
       mongoose.connect(
-            `mongodb+srv://${config_env.database.username}:${config_env.database.password}@${config_env.database.cluster}.mongodb.net/${config_env.database.dbname}?retryWrites=true&w=majority`, 
+            `mongodb+srv://${process.env.db_username}:${process.env.db_password}@${process.env.cluster}.mongodb.net/${process.env.dbname}?retryWrites=true&w=majority`, 
             {
                 useNewUrlParser: true, 
                 useUnifiedTopology: true 
