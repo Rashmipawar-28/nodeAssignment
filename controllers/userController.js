@@ -60,37 +60,48 @@ module.exports = {
     async createUser(req,res){
         const newuser = req.body;
         const {email,phone} = req.body;
-        const userEmail = await Users.findOne({email, "deletedAt" : null});
-        const userPhone = await Users.findOne({phone, "deletedAt" : null});
+        const userEmail = await Users.findOne({email});
+        const userPhone = await Users.findOne({phone});
+        console.log(userEmail)
         try{
-            if(userEmail){
+            if(userEmail && userEmail.deletedAt != null && userPhone && userPhone.deletedAt != null){
+                userEmail.deletedAt = null;
+                userEmail.password = newuser.password
+                await userEmail.save();
                 res.send({
-                    type:false,
-                    msg:"User with this email already exists"
-                })
-            }else if(userPhone){
-                res.send({
-                    type:false,
-                    msg:"User with this phone already exists"
+                    type:true,
+                    msg:"User created"
                 })
             }else{
-                const user  = new Users(newuser)
-                user.save((error=>{
-                    if(error){
-                        console.log(error)
-                        res.send({
-                            type:false,
-                            msg:'creating user Failed, try again'
-                        })
-                    }else{
-                        res.send({
-                            type:true,
-                            msg:"User created"
-                        })
-                    }
-                }));
+                if(userEmail){
+                    res.send({
+                        type:false,
+                        msg:"User with this email already exists"
+                    })
+                }else if(userPhone){
+                    res.send({
+                        type:false,
+                        msg:"User with this phone already exists"
+                    })
+                }else{
+                    const user  = new Users(newuser)
+                    await user.save((error=>{
+                        if(error){
+                            console.log(error)
+                            res.send({
+                                type:false,
+                                msg:'creating user Failed, try again'
+                            })
+                        }else{
+                            res.send({
+                                type:true,
+                                msg:"User created"
+                            })
+                        }
+                    }));
+                }
             }
-
+            
         }catch(err){
             res.send({
                 type:false,
@@ -138,41 +149,48 @@ module.exports = {
 
         // const hashedPassword = await utils.hashedPassword(req.body.password)
         // const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt');
-        await user.findOneAndUpdate({_id:userId,deletedAt:null}, 
-            {
-              
-                name: req.body.name,
-                email: req.body.email,
-                phone : req.body.phone,
-                // password: hashedPassword,
-                updatedAt: new Date()
-            },
-            {
-              multi: true
-            }).then(data => {
-                if(!data) {
-                    return res.send({
-                        type:false,
-                        msg:"user not found with id " + req.params.userId
+        if(req.body.password){
+            return res.send({
+                type:false,
+                msg:"can not update user password here"
+            })    
+        }else{
+            await user.findOneAndUpdate({_id:userId,deletedAt:null}, 
+                {
+                  
+                    name: req.body.name,
+                    email: req.body.email,
+                    phone : req.body.phone,
+                    // password: hashedPassword,
+                    updatedAt: new Date()
+                },
+                {
+                  multi: true
+                }).then(data => {
+                    if(!data) {
+                        return res.send({
+                            type:false,
+                            msg:"user not found with id " + req.params.userId
+                        })
+                    }
+                    res.send({
+                        type:true,
+                        msg:"User updated"
                     })
-                }
-                res.send({
-                    type:true,
-                    msg:"User updated"
-                })
-            }).catch(err => {
-                console.log(err)
-                if(err.kind === 'ObjectId') {
+                }).catch(err => {
+                    console.log(err)
+                    if(err.kind === 'ObjectId') {
+                        return res.send({
+                            type:false,
+                            msg:"user not found with id " + req.params.userId
+                        })               
+                    }
                     return res.send({
                         type:false,
-                        msg:"user not found with id " + req.params.userId
-                    })               
-                }
-                return res.send({
-                    type:false,
-                    msg:"Error updating user with id " + req.params.userId
-                })     
-            })
+                        msg:"Error updating user with id " + req.params.userId
+                    })     
+                })
+        }
                
     }
 }

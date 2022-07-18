@@ -33,7 +33,8 @@ const userSchema = new Schema({
 
 userSchema.pre('save',function(next){
     const user = this;
-    bcrypt.genSalt(process.env.saltRounds, (error, salt) =>{
+    saltRounds = parseInt(process.env.saltRounds)
+    bcrypt.genSalt(saltRounds, (error, salt) =>{
         bcrypt.hash(user.password, salt, function(err, hash) {
             // Store hash in your password DB.
             user.password = hash;
