@@ -1,23 +1,23 @@
 const Users = require('../models/user')
 const mongoose = require("mongoose");
 const user = require('../models/user');
-const utils = require('./utils')
+const utils = require('./utils/utils')
 const ObjectId = mongoose.Types.ObjectId; 
 
 
 module.exports = {
     async getAllUsers(req,res){
-        const users = await Users.find({}).select('-password');
+        const users = await Users.find({"deletedAt" : null }).select('-password');
        try{
             if(users){
-               const userList = await users.filter((user)=>{
-                    if(user.deletedAt == null){
-                        return user
-                    }
-                })
+            //    const userList = await users.filter((user)=>{
+            //         if(user.deletedAt == null){
+            //             return user
+            //         }
+            //     })
                 res.send({
                     type:true,
-                    data:userList
+                    data:users
                 })
             }else{
                 res.send({
@@ -32,9 +32,10 @@ module.exports = {
 
     async getSingleUser(req,res){
         const userId  = new ObjectId(req.params.userId);
-        const user = await Users.findOne({ "_id":userId }).select('-password');
+        const user = await Users.findOne({ "_id":userId,"deletedAt" : null }).select('-password');
        try{
-            if(user && user.deletedAt == null){
+            // if(user && user.deletedAt == null)
+            if(user){
                 res.send({
                     type:true,
                     data:user
@@ -53,8 +54,8 @@ module.exports = {
     async createUser(req,res){
         const newuser = req.body;
         const {email,phone} = req.body;
-        const userEmail = await Users.findOne({email});
-        const userPhone = await Users.findOne({phone});
+        const userEmail = await Users.findOne({email, "deletedAt" : null});
+        const userPhone = await Users.findOne({phone, "deletedAt" : null});
         try{
             if(userEmail){
                 res.send({
