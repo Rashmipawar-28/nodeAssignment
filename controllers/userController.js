@@ -15,19 +15,19 @@ module.exports = {
             //             return user
             //         }
             //     })
-                res.send({
-                    type:true,
+                res.status(200).send({
+                    status:'ok',
                     data:users
                 })
             }else{
-                res.send({
-                    type:false,
+                res.status(422).send({
+                    status:"Unprocessable Entity",
                     msg:"No users found"
                 })
             }
        }catch(error){
-        res.send({
-            type:false,
+        res.status(500).send({
+            status:'Internal Server Error',
             msg:"error while getting users"
         })
        }
@@ -39,21 +39,21 @@ module.exports = {
        try{
             // if(user && user.deletedAt == null)
             if(user){
-                res.send({
-                    type:true,
+                res.res.status(200).send({
+                    status:'ok',
                     data:user
                 })
             }else{
-                res.send({
-                    type:false,
-                    msg:"No users found"
+                res.status(422).send({
+                    status:"Unprocessable Entity",
+                    msg:"No users found with id : "+ userId
                 })
             }
        }catch(error){
-        res.send({
-            type:false,
-            msg:"error while getting user with id : "+ userId
-        })
+            res.status(500).send({
+                status:'Internal Server Error',
+                msg:"error while getting user with id : "+ userId
+            })
        }
     },
 
@@ -68,19 +68,19 @@ module.exports = {
                 userEmail.deletedAt = null;
                 userEmail.password = newuser.password
                 await userEmail.save();
-                res.send({
-                    type:true,
+                res.status(200).send({
+                    status:'ok',
                     msg:"User created"
                 })
             }else{
                 if(userEmail){
-                    res.send({
-                        type:false,
+                    res.status(422).send({
+                        status:"Unprocessable Entity",
                         msg:"User with this email already exists"
                     })
                 }else if(userPhone){
-                    res.send({
-                        type:false,
+                    res.status(422).send({
+                        status:"Unprocessable Entity",
                         msg:"User with this phone already exists"
                     })
                 }else{
@@ -88,13 +88,13 @@ module.exports = {
                     await user.save((error=>{
                         if(error){
                             console.log(error)
-                            res.send({
-                                type:false,
+                            res.status(422).send({
+                                status:'Unprocessable Entity',
                                 msg:'creating user Failed, try again'
                             })
                         }else{
-                            res.send({
-                                type:true,
+                            res.status(200).send({
+                                status:'ok',
                                 msg:"User created"
                             })
                         }
@@ -103,10 +103,10 @@ module.exports = {
             }
             
         }catch(err){
-            res.send({
-                type:false,
+            return res.status(500).send({
+                status:'Internal Server Error',
                 msg:"error while creating a user"
-            })
+            })    
         }
     },
 
@@ -118,28 +118,28 @@ module.exports = {
                 if(user.deletedAt == null){
                     user.deletedAt = new Date();
                     await user.save();
-                    res.send({
-                        type:true,
+                    res.status(200).send({
+                        status:"ok",
                         data:"User deleted"
                     })
                 }else{
-                    res.send({
-                        type:false,
+                    res.status(422).send({
+                        status:"Unprocessable Entity",
                         msg:"user does not exists"
                     })
                 }
                 
             }else{
-                res.send({
-                    type:false,
+                res.status(422).send({
+                    status:"Unprocessable Entity",
                     msg:"user not deleted"
                 })
             }
        }catch(error){
-        res.send({
-            type:false,
+        return res.status(500).send({
+            status:'Internal Server Error',
             msg:"error while deleting a user"
-        })
+        }) 
        }
     },
 
@@ -150,8 +150,8 @@ module.exports = {
         // const hashedPassword = await utils.hashedPassword(req.body.password)
         // const user = await Users.findOne({ "_id":userId }).select('name email phone deletedAt');
         if(req.body.password){
-            return res.send({
-                type:false,
+            return res.status(400).send({
+                status:'Bad Request',
                 msg:"can not update user password here"
             })    
         }else{
@@ -168,25 +168,24 @@ module.exports = {
                   multi: true
                 }).then(data => {
                     if(!data) {
-                        return res.send({
-                            type:false,
+                        return res.status(422).send({
+                            status:"Unprocessable Entity",
                             msg:"user not found with id " + req.params.userId
                         })
                     }
-                    res.send({
-                        type:true,
+                    res.status(200).send({
+                        status:'ok',
                         msg:"User updated"
                     })
                 }).catch(err => {
-                    console.log(err)
                     if(err.kind === 'ObjectId') {
-                        return res.send({
-                            type:false,
+                        return res.status(400).send({
+                            status:'Bad Request',
                             msg:"user not found with id " + req.params.userId
                         })               
                     }
-                    return res.send({
-                        type:false,
+                    return res.status(500).send({
+                        status:'Internal Server Error',
                         msg:"Error updating user with id " + req.params.userId
                     })     
                 })
